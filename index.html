@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+<audio id="bgMusic" src="audio/bg-music.mp3" loop></audio>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
@@ -168,10 +169,6 @@
 }
 
 
-.blur #fortune {
-  opacity: 0;
-}
-
 <!--集卡簿-->
 .card::before {
   content: "";
@@ -292,26 +289,29 @@
   z-index: 1;
 }
 <!--淡入-->
-        .fade-in {
+
+.hidden {
   opacity: 0;
-  animation: fadeIns 10s ease forwards;
+}
+.fade-in {
+  animation: fadeIn 1s ease forwards;
 }
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to   { opacity: 1; }
-}
+    to   { opacity: 1; }
 
+}
     </style>
 </head>
 <body onload="setRandomBackground()">
-<!--<div id="test" style="display: none;">Hello</div>-->
+
 <div id="contentWrapper">
-    <div id="fortune"  >
-        ✨21天正能量養成✨<br>用一張宇宙回音卡，開始今天的好心情。備好了嗎?先深呼吸三次，心中想著今天宇宙有什麼話想跟我說，並按下接收。🌟</div>
-    <button id="drawBtn" onclick="drawFortune()">接收 ✨</button>
-    <button id="bgBtn" onclick="setRandomBackground()">切換背景 🌈</button>
-    <button onclick="showCardGallery()" id="openGalleryBtn"> 💫 我的宇宙回音</button>
+    <div id="fortune"style="opacity: 0;"  >
+        ✨21天正能量養成✨<br>用一張宇宙回音卡，開始今天的好心情。<br>備好了嗎?先深呼吸三次，<br>心中想著今天宇宙有什麼話想跟我說，<br>並按下接收。🌟</div>
+    <button id="drawBtn" onclick="drawFortune()" style="opacity: 0;" >接收 ✨</button>
+    <button id="bgBtn" onclick="setRandomBackground()" style="opacity: 0;">切換背景 🌈</button>
+        <button onclick="showCardGallery()" id="openGalleryBtn" style="opacity: 0;" > 💫 我的宇宙回音</button>
 
     <div id="bgSelector" class="bg-selector" style="display: none;">
         <p>請選擇背景圖：</p>
@@ -329,7 +329,6 @@
     </div>
 </div>
 
-</div>
 <div id="cardGallery" style="display:none;"></div>
 <div class="card-popup" id="cardPopup" style="display: none;">
     <h2>✨ 你抽到的籤語 ✨</h2>
@@ -354,207 +353,225 @@
 <div id="cardGallery" style="display: none;"></div>
 <button id="closeGalleryBtn" style="display:none; margin: 20px auto;" onclick="closeCardGallery()">❎ 關閉</button>
 <script>
+    const backgrounds = [
+                         'images/bg1.png',
+                         'images/bg2.png',
+                         'images/bg3.png',
+                         'images/bg4.png',
+                         'images/bg5.png',
+                         'images/bg6.png',
+                         'images/bg7.png',
+                         'images/bg8.png',
+                         'images/bg9.png',
+                         'images/bg10.png',
+                         'images/bg11.png'
 
-  
-<!--    document.addEventListener("DOMContentLoaded", () => {-->
-<!--        const el = document.getElementById("fortune");-->
-<!--        el.classList.add("fade-in");-->
-<!--        el.style.display="block";-->
-<!--};-->
+                       ];
+                        function setRandomBackground() {
+                          const randomIndex = Math.floor(Math.random() * backgrounds.length);
+                          document.body.style.backgroundImage = `url('${backgrounds[randomIndex]}')`;
+                          document.body.style.backgroundSize = 'cover';
+                          document.body.style.backgroundPosition = 'center';
+                          document.body.style.backgroundRepeat = 'no-repeat';
+                        }
+    window.onload = function () {
+    setRandomBackground();
+    const bgMusic = document.getElementById("bgMusic");
+  document.body.addEventListener("click", () => {
+    bgMusic.play().catch(e => console.log("自動播放被瀏覽器阻擋"));
+  }, { once: true }); // 只綁定一次，點擊一次後自動播放
+    const elements = [
+    document.getElementById("fortune"),
+    document.getElementById("drawBtn"),
+    document.getElementById("bgBtn"),
+    document.getElementById("openGalleryBtn")
+  ];
 
-
-        const backgrounds = [
-               'images/bg1.png',
-               'images/bg2.png',
-               'images/bg3.png',
-               'images/bg4.png',
-               'images/bg5.png',
-               'images/bg6.png',
-               'images/bg7.png',
-               'images/bg8.png',
-               'images/bg9.png',
-               'images/bg10.png',
-               'images/bg11.png'
-
-             ];
-
-             function drawFortune() {
-                     const today = new Date().toLocaleDateString();
-                const lastDrawDate = localStorage.getItem("lastDrawDate");
-                if (lastDrawDate === today) {
-                    alert("今天已經抽過囉～明天再來 🌟");
-                    return;
-                }
-
-               const fortunes = [
-                 "你沒有走得太慢，只是在好好感受風景。",
-                 "今天的你，很努力了，該休息一下了。",
-                 "即使沒有人說，你也做得很好。",
-                 "你不需要完美，只要存在就足夠美好。",
-                 "世界有點吵，但你可以選擇靜下來。",
-                 "傷口會癒合，就像太陽總會升起。",
-                 "心軟不是缺點，是你心裡有溫柔的水源。",
-                 "當你學會溫柔對待自己，宇宙也會溫柔對你。",
-                 "別急，一切都會在剛剛好的時間到來。",
-                 "接受任何改變，讓自己變得更好。",
-                 "持續努力，事情會有方向，會越來越好。",
-                 "現在的你是處於最佳狀態，勇敢去冒險吧!",
-                 "改變雖難，勿畏懼，這是為了更好的人生。",
-                 "困境限制你，給自己力量，向前走便能突破。",
-                 "現在不宜衝動，先準備好再等時機。",
-                 "享受過去努力，妥善規劃未來新開始。",
-                 "解決未了的事，別活在過去。",
-                 "現在是最佳改變時機，等待將無法帶來變化。",
-                 "遇不適事情，離開即可，無需硬碰硬。",
-                 "將個人利益置於最後，任何目標都需付出代價。",
-                 "付出與回報要平衡，勿盲目付出或過度接受。",
-                 "若能把握機會，任何挫折都將轉化為你的武器。",
-                 "理性感性拉扯中，統整後隨直覺而行。",
-                 "新的開始將激發你的潛能，但別忘了好好休息。",
-                 "耐心點，給好運一點時間。",
-                 "近期可能迎來重大突破，接受改變，不要抗拒。",
-                 "相信直覺，重視過程，定能達到目標。",
-                 "多走走充實心靈，機會正逐漸靠近。",
-                 "你是擁有能力面對任何事情的，不用害怕相信自己。",
-                 "想做甚麼事情就去做，不要害怕犯錯。",
-                 "你內心是很強大的，沒有甚麼事會讓你到害怕。",
-                 "制定目標跟著感覺走，不能衝動隨時保持警覺。",
-                 "只要往前走絕對有解決的方法，停在原地是沒有幫助的。",
-                 "只要努力去做宇宙自然會幫助你。",
-                 "幫助他人也接受別人的幫助，人是需要互相依靠的。",
-                 "保持開放心態，相信自己，很多事情都會上軌道。",
-                 "過去付出的努力將會有結果。",
-                 "世界不變的道理就是一切都在變，接受改變，享受過程。"
-               ];
-            const result = fortunes[Math.floor(Math.random() * fortunes.length)];
-                document.getElementById("fortune").innerText = result;
-
-                localStorage.setItem("lastDrawDate", today);
-                saveFortune(result);
-               }
-             function setRandomBackground() {
-                const randomIndex = Math.floor(Math.random() * backgrounds.length);
-                document.body.style.backgroundImage = `url('${backgrounds[randomIndex]}')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center';
-                document.body.style.backgroundRepeat = 'no-repeat';
-              }
+ for (let i = 0; i < elements.length; i++) {
+  if (elements[i]) {
+    setTimeout(() => {
+      elements[i].classList.add("fade-in");
+    }, i * 600); // 每個元素延遲 600ms
+  }
+}
+};
 
 
-               function changeBackground(imagePath) {
-                 document.body.style.backgroundImage = `url('${imagePath}')`;
-               }
-               function toggleBackgrounds() {
-             const bgDiv = document.getElementById("bgSelector");
-             bgDiv.style.display = (bgDiv.style.display === "none") ? "block" : "none";
-            }
-
-                function saveFortune(fortune) {
-              let history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
-              if (history.length > 0 && typeof history[0] === "string") {
-                history = [];
-              }
-              const alreadyExists = history.some(item => item.text === fortune);
-              if (!alreadyExists) {
-                const today = new Date().toLocaleDateString();
-                history.push({ text: fortune, date: today });
-                localStorage.setItem("fortuneHistory", JSON.stringify(history));
-              }
-            }
 
 
-            <!--集卡簿-->
-            function saveNotes() {
-              const quote = document.getElementById("cardQuote").innerText;
-              const note1 = document.getElementById("note1").value;
-              const note2 = document.getElementById("note2").value;
-              const note3 = document.getElementById("note3").value;
-              localStorage.setItem("notes_" + quote, JSON.stringify([note1, note2, note3]));
-              alert("已保存今日的三件美好小事 💖");
-            }
-            function showCardGallery() {
-              // 2. 顯示 cardGallery
-              const history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
-              const container = document.getElementById("cardGallery");
-              container.innerHTML = ""; // 清空內容
+                       function drawFortune() {
+                               const today = new Date().toLocaleDateString();
+                          const lastDrawDate = localStorage.getItem("lastDrawDate");
+                          if (lastDrawDate === today) {
+                              alert("今天已經抽過囉～明天再來 🌟");
+                              document.getElementById("contentWrapper").style.display = "block";
+                 document.getElementById("fortune").style.display = "block";
+                              return;
+                          }
 
-              if (history.length === 0) {
-                container.innerHTML = '<p style="text-align:center; font-size:1.2em;">你還沒有任何宇宙回音卡牌，快去抽一張吧！</p>';
-              } else {
-                history.forEach((item, index) => {
-                  if (!item || !item.text || !item.date) return;
-                  const card = document.createElement("div");
-                  card.className = "card";
-                  const notes = JSON.parse(localStorage.getItem("notes_" + item.text)) || ["", "", ""];
-            card.innerHTML = `
-              <div class="card-content">
-              <p class="card-date">📅 ：${item.date}</p>
-                <p class="quote-text">「${item.text}」</p>
-                </div>
-              <div class="card-content">
-                <p>💡 1. ${notes[0] || "(尚未紀錄)"}</p>
-                <p>💡 2. ${notes[1] || "(尚未紀錄)"}</p>
-                <p>💡 3. ${notes[2] || "(尚未紀錄)"}</p>
-              </div>
-            `;
-                   card.onclick = () => openCardPopup(item.text);
-                  container.appendChild(card);
-                });
-              }
-              container.style.display = "flex";
-              // 3. 顯示關閉按鈕
-              document.getElementById("closeGalleryBtn").style.display = "block";
-              document.getElementById("contentWrapper").style.display = "none";
-            }
-            function migrateOldFortuneData() {
-              let history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
+                         const fortunes = [
+                           "你沒有走得太慢，只是在好好感受風景。",
+                           "今天的你，很努力了，該休息一下了。",
+                           "即使沒有人說，你也做得很好。",
+                           "你不需要完美，只要存在就足夠美好。",
+                           "世界有點吵，但你可以選擇靜下來。",
+                           "傷口會癒合，就像太陽總會升起。",
+                           "心軟不是缺點，是你心裡有溫柔的水源。",
+                           "當你學會溫柔對待自己，宇宙也會溫柔對你。",
+                           "別急，一切都會在剛剛好的時間到來。",
+                           "接受任何改變，讓自己變得更好。",
+                           "持續努力，事情會有方向，會越來越好。",
+                           "現在的你是處於最佳狀態，勇敢去冒險吧!",
+                           "改變雖難，勿畏懼，這是為了更好的人生。",
+                           "困境限制你，給自己力量，向前走便能突破。",
+                           "現在不宜衝動，先準備好再等時機。",
+                           "享受過去努力，妥善規劃未來新開始。",
+                           "解決未了的事，別活在過去。",
+                           "現在是最佳改變時機，等待將無法帶來變化。",
+                           "遇不適事情，離開即可，無需硬碰硬。",
+                           "將個人利益置於最後，任何目標都需付出代價。",
+                           "付出與回報要平衡，勿盲目付出或過度接受。",
+                           "若能把握機會，任何挫折都將轉化為你的武器。",
+                           "理性感性拉扯中，統整後隨直覺而行。",
+                           "新的開始將激發你的潛能，但別忘了好好休息。",
+                           "耐心點，給好運一點時間。",
+                           "近期可能迎來重大突破，接受改變，不要抗拒。",
+                           "相信直覺，重視過程，定能達到目標。",
+                           "多走走充實心靈，機會正逐漸靠近。",
+                           "你是擁有能力面對任何事情的，不用害怕相信自己。",
+                           "想做甚麼事情就去做，不要害怕犯錯。",
+                           "你內心是很強大的，沒有甚麼事會讓你到害怕。",
+                           "制定目標跟著感覺走，不能衝動隨時保持警覺。",
+                           "只要往前走絕對有解決的方法，停在原地是沒有幫助的。",
+                           "只要努力去做宇宙自然會幫助你。",
+                           "幫助他人也接受別人的幫助，人是需要互相依靠的。",
+                           "保持開放心態，相信自己，很多事情都會上軌道。",
+                           "過去付出的努力將會有結果。",
+                           "世界不變的道理就是一切都在變，接受改變，享受過程。"
+                         ];
+                      const result = fortunes[Math.floor(Math.random() * fortunes.length)];
+                          document.getElementById("fortune").innerText = result;
 
-              // 若資料已經轉過格式（是 object array），就跳過
-              if (history.length > 0 && typeof history[0] === "object") return;
+                          localStorage.setItem("lastDrawDate", today);
+                          saveFortune(result);
+                         }
 
-              const today = new Date().toLocaleDateString();
-              const newHistory = history
-                .filter(text => typeof text === "string" && text.trim() !== "") // 避免空字串
-                .map(text => ({ text, date: today }));
 
-              localStorage.setItem("fortuneHistory", JSON.stringify(newHistory));
-            }
-               function openCardPopup(text) {
-              document.getElementById("cardQuote").innerText = text;
-              const savedNotes = JSON.parse(localStorage.getItem("notes_" + text)) || ["", "", ""];
-              document.getElementById("note1").value = savedNotes[0];
-              document.getElementById("note2").value = savedNotes[1];
-              document.getElementById("note3").value = savedNotes[2];
-              document.getElementById("cardPopup").style.display = "block";
-               document.getElementById("cardGallery").style.display = "none";
-              document.getElementById("closeGalleryBtn").style.display = "none";
-              document.getElementById("closeCardPopup").style.display = "flex";
-            }
-            <!--卡片-->
-            function closeCardPopup() {
-              document.getElementById("cardPopup").style.display = "none";
-              document.getElementById("contentWrapper").style.display = "none";
-              document.getElementById("cardGallery").style.display = "flex";
-              document.getElementById("closeGalleryBtn").style.display = "flex";
-            }
-            <!--集把簿-->
-                function closeCardGallery() {
-                 document.getElementById("contentWrapper").style.display = "block";
-              document.getElementById("fortune").style.display = "flex";
-              document.getElementById("closeCardPopup").style.display = "none";
-              document.getElementById("closeGalleryBtn").style.display = "none";
-            document.getElementById("cardGallery").style.display = "none";
-            }
 
-            <!--  // ✅ 清除重複或格式錯誤的歷史紀錄（只跑一次）-->
-            <!--  const raw = JSON.parse(localStorage.getItem("fortuneHistory")) || [];-->
-            <!--  const seen = new Set();-->
-            <!--  const cleaned = raw.filter(item => {-->
-            <!--    if (!item.text || seen.has(item.text)) return false;-->
-            <!--    seen.add(item.text);-->
-            <!--    return true;-->
-            <!--  });-->
-            <!--  localStorage.setItem("fortuneHistory", JSON.stringify(cleaned));-->
+                         function changeBackground(imagePath) {
+                           document.body.style.backgroundImage = `url('${imagePath}')`;
+                         }
+                         function toggleBackgrounds() {
+                       const bgDiv = document.getElementById("bgSelector");
+                       bgDiv.style.display = (bgDiv.style.display === "none") ? "block" : "none";
+                      }
+
+                          function saveFortune(fortune) {
+                        let history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
+                        if (history.length > 0 && typeof history[0] === "string") {
+                          history = [];
+                        }
+                        const alreadyExists = history.some(item => item.text === fortune);
+                        if (!alreadyExists) {
+                          const today = new Date().toLocaleDateString();
+                          history.push({ text: fortune, date: today });
+                          localStorage.setItem("fortuneHistory", JSON.stringify(history));
+                        }
+                      }
+
+
+                      <!--集卡簿-->
+                      function saveNotes() {
+                        const quote = document.getElementById("cardQuote").innerText;
+                        const note1 = document.getElementById("note1").value;
+                        const note2 = document.getElementById("note2").value;
+                        const note3 = document.getElementById("note3").value;
+                        localStorage.setItem("notes_" + quote, JSON.stringify([note1, note2, note3]));
+                        alert("已保存今日的三件美好小事 💖");
+                      }
+                      function showCardGallery() {
+                        // 2. 顯示 cardGallery
+                        const history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
+                        const container = document.getElementById("cardGallery");
+                        container.innerHTML = ""; // 清空內容
+
+                        if (history.length === 0) {
+                          container.innerHTML = '<p style="text-align:center; font-size:1.2em;">你還沒有任何宇宙回音卡牌，快去抽一張吧！</p>';
+                        } else {
+                          history.forEach((item, index) => {
+                            if (!item || !item.text || !item.date) return;
+                            const card = document.createElement("div");
+                            card.className = "card";
+                            const notes = JSON.parse(localStorage.getItem("notes_" + item.text)) || ["", "", ""];
+                      card.innerHTML = `
+                        <div class="card-content">
+                        <p class="card-date">📅 ：${item.date}</p>
+                          <p class="quote-text">「${item.text}」</p>
+                          </div>
+                        <div class="card-content">
+                          <p>💡 1. ${notes[0] || "(尚未紀錄)"}</p>
+                          <p>💡 2. ${notes[1] || "(尚未紀錄)"}</p>
+                          <p>💡 3. ${notes[2] || "(尚未紀錄)"}</p>
+                        </div>
+                      `;
+                             card.onclick = () => openCardPopup(item.text);
+                            container.appendChild(card);
+                          });
+                        }
+                        container.style.display = "flex";
+                        // 3. 顯示關閉按鈕
+                        document.getElementById("closeGalleryBtn").style.display = "block";
+                        document.getElementById("contentWrapper").style.display = "none";
+                      }
+                      function migrateOldFortuneData() {
+                        let history = JSON.parse(localStorage.getItem("fortuneHistory")) || [];
+
+                        // 若資料已經轉過格式（是 object array），就跳過
+                        if (history.length > 0 && typeof history[0] === "object") return;
+
+                        const today = new Date().toLocaleDateString();
+                        const newHistory = history
+                          .filter(text => typeof text === "string" && text.trim() !== "") // 避免空字串
+                          .map(text => ({ text, date: today }));
+
+                        localStorage.setItem("fortuneHistory", JSON.stringify(newHistory));
+                      }
+                         function openCardPopup(text) {
+                        document.getElementById("cardQuote").innerText = text;
+                        const savedNotes = JSON.parse(localStorage.getItem("notes_" + text)) || ["", "", ""];
+                        document.getElementById("note1").value = savedNotes[0];
+                        document.getElementById("note2").value = savedNotes[1];
+                        document.getElementById("note3").value = savedNotes[2];
+                        document.getElementById("cardPopup").style.display = "block";
+                         document.getElementById("cardGallery").style.display = "none";
+                        document.getElementById("closeGalleryBtn").style.display = "none";
+                        document.getElementById("closeCardPopup").style.display = "flex";
+                      }
+         <!--             &lt;!&ndash;卡片&ndash;&gt;-->
+                      function closeCardPopup() {
+                        document.getElementById("cardPopup").style.display = "none";
+                        document.getElementById("contentWrapper").style.display = "none";
+                        document.getElementById("cardGallery").style.display = "flex";
+                        document.getElementById("closeGalleryBtn").style.display = "flex";
+                      }
+         <!--             &lt;!&ndash;集把簿&ndash;&gt;-->
+                          function closeCardGallery() {
+                           document.getElementById("contentWrapper").style.display = "block";
+                        document.getElementById("fortune").style.display = "flex";
+                        document.getElementById("closeCardPopup").style.display = "none";
+                        document.getElementById("closeGalleryBtn").style.display = "none";
+                      document.getElementById("cardGallery").style.display = "none";
+                      }
+
+<!--                        // ✅ 清除重複或格式錯誤的歷史紀錄（只跑一次）-->
+<!--                        const raw = JSON.parse(localStorage.getItem("fortuneHistory")) || [];-->
+<!--                        const seen = new Set();-->
+<!--                        const cleaned = raw.filter(item => {-->
+<!--                          if (!item.text || seen.has(item.text)) return false;-->
+<!--                          seen.add(item.text);-->
+<!--                          return true;-->
+<!--                        });-->
+<!--                        localStorage.setItem("fortuneHistory", JSON.stringify(cleaned));-->
 </script>
 </body>
 </html>
